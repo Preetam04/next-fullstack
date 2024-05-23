@@ -1,13 +1,13 @@
-import { Toaster } from "@/components/ui/toaster";
-import AuthProvider from "@/context/AuthProviders";
-import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import AuthProvider from "@/context/AuthProviders";
+import { Toaster } from "@/components/ui/toaster";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mystery Message",
+  title: "Welcome to Mystery Message",
   description: "Next fullstack application",
 };
 
@@ -18,12 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <AuthProvider>
-        <body className={inter.className}>
-          {children}
-          <Toaster />
-        </body>
-      </AuthProvider>
+      <body className={inter.className}>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }
