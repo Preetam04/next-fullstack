@@ -1,12 +1,17 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
+import { authOptions } from "../../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import { User } from "next-auth";
 import mongoose from "mongoose";
 
-export async function GET(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { messageid: string } }
+) {
   await dbConnect();
+
+  const messageId = params.messageid;
 
   const session = await getServerSession(authOptions);
 
@@ -24,38 +29,21 @@ export async function GET(request: Request) {
     );
   }
 
-  const userId = new mongoose.Types.ObjectId(user._id);
-
-  const userData = await UserModel.findById(userId);
-
   try {
-    const user = await UserModel.aggregate([
+    const updatedResult = await UserModel.updateOne(
       {
-        $match: { id: userId },
+        _id: user._id,
       },
       {
-        $unwind: "$messages",
-      },
-      {
-        $sort: {
-          "messages.createdAt": -1,
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          messages: {
-            $push: "messages",
-          },
-        },
-      },
-    ]);
+        $pull: { messages: { _id: messageId } },
+      }
+    );
 
-    if (!user || user.length === 0) {
+    if (updatedResult.modifiedCount === 0) {
       return Response.json(
         {
           success: false,
-          message: "User Messages not found",
+          message: "Message not found or already deleted",
         },
         {
           status: 404,
@@ -66,19 +54,19 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
-        messages: user[0].messages,
+        message: "Message Deleted",
       },
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.log("Unexpected Error", error);
+    console.log("Error in delete message route");
 
     return Response.json(
       {
         success: false,
-        message: "Unexpected Error occured",
+        message: "Error deleting message",
       },
       {
         status: 500,

@@ -14,7 +14,7 @@ import { verifySchema } from "@/schemas/verifySchema";
 import { ApiResponse } from "@/types/ApiResponse";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
-import { useParams, useRouter } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -40,6 +40,8 @@ const VerifyAccount = () => {
         title: "Success",
         description: response?.data.message,
       });
+
+      // router.replace("/dashboard");
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
